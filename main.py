@@ -35,7 +35,7 @@ button13 = "N1"                    # ยิงช้า BL1-BL2
 
 ##### PROGRAMMER ZONE #####
 
-# variablesS
+# variables
 timer = 0
 automaticState = False
 isAutoPressed = False
