@@ -18,19 +18,19 @@ brushlessSpeed2 = 50
 
 # button settings
 autoStateKey = "L2"                # automatic state key
-button1 = "L1"                     # สายพานขึ้น DC4-DC8
-button2 = "R1"                     # สายพานลง DC4-DC8
-button3 = "Up"                     # สลิงขึ้น DC3
-button4 = "Down"                   # สลิงลง DC3
-button5 = "Left"                   # หนีบเข้า DC2
-button6 = "Right"                  # หนีบออก DC2
-button7 = "R2"                     # ยกธงขึ้น servo3
-button8 = "N2"                     # ที่ยิงยกขึ้น servo2
-button9 = "N3"                     # ที่ยิงยกลง servo2
-button10 = "+"                     # กวาดบอล / recycle เข้า servo1
-button11 = "≡"                     # กวาดบอล / recycle ออก servo1            
-button12 = "N4"                    # ยิงเร็ว BL1-BL2
-button13 = "N1"                    # ยิงช้า BL1-BL2
+button1 = "L1"                     # สายพานขึ้น (DC5-DC8)
+button2 = "R1"                     # สายพานลง (DC5-DC8)
+button3 = "Up"                     # สลิงขึ้น (DC3)
+button4 = "Down"                   # สลิงลง (DC3)
+button5 = "Left"                   # หนีบเข้า (DC2)
+button6 = "Right"                  # หนีบออก (DC2)
+button7 = "R2"                     # ยกธงขึ้น (DC1)
+button8 = "N2"                     # ที่ยิงยกขึ้น servo2 (M2)
+button9 = "N3"                     # ที่ยิงยกลง servo2 (M2)
+button10 = "+"                     # กวาดบอล / recycle เข้า servo1 (M1)
+button11 = "≡"                     # กวาดบอล / recycle ออก servo1 (M1)       
+button12 = "N4"                    # ยิงเร็ว (BL1-BL2, DC4)
+button13 = "N1"                    # ยิงช้า (BL1-BL2, DC4)
 
 
 ##### PROGRAMMER ZONE #####
@@ -48,7 +48,6 @@ encoder4 = encoder_motor_class("M4", "INDEX1")
 sensor = ranging_sensor_class("PORT1", "INDEX1")
 servo1 = smartservo_class("M1", "INDEX1")
 servo2 = smartservo_class("M2", "INDEX1")
-servo3 = smartservo_class("M3", "INDEX1")
 
 # encoder control function
 def encoderControl(divider:float): # check!
@@ -80,22 +79,23 @@ def brushlessPower(speed:float):
 def brushlessControl(key1:str, key2:str, speed1:float, speed2:float): # check!
     if gamepad.is_key_pressed(key1):
         brushlessPower(speed1)
+        power_expand_board.set_power("DC4", 100)
     elif gamepad.is_key_pressed(key2):
         brushlessPower(speed2)
+        power_expand_board.set_power("DC4", 100)
     else:
         power_expand_board.stop("BL1")
         power_expand_board.stop("BL2")
+        power_expand_board.stop("DC4")
 
 # DC control function
 def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:str, speed:float): #add ...keyN
     if gamepad.is_key_pressed(key1):
-        power_expand_board.set_power("DC4", speed)
         power_expand_board.set_power("DC5", speed)
         power_expand_board.set_power("DC6", speed)
         power_expand_board.set_power("DC7", speed)
         power_expand_board.set_power("DC8", speed)
     elif gamepad.is_key_pressed(key2):
-        power_expand_board.set_power("DC4", -speed)
         power_expand_board.set_power("DC5", -speed)
         power_expand_board.set_power("DC6", -speed)
         power_expand_board.set_power("DC7", -speed)
@@ -114,7 +114,6 @@ def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:
         power_expand_board.stop("DC1")
         power_expand_board.stop("DC2")
         power_expand_board.stop("DC3")
-        power_expand_board.stop("DC4")
         power_expand_board.stop("DC5")
         power_expand_board.stop("DC6")
         power_expand_board.stop("DC7")
@@ -145,7 +144,6 @@ while True:
                 DC_Control(button1, button2, button3, button4, button5, button6, button7, DC_DefaultSpeed)
                 servoControl(servo1, button10, button11, servoDefaultSpeed)
                 servoControl(servo2, button8, button9, servoDefaultSpeed)
-                servoControl(servo3, button7, None, servoDefaultSpeed)
                 brushlessControl(button12, button13, brushlessSpeed1, brushlessSpeed2)
 
         else:
