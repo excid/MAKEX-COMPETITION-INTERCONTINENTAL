@@ -1,11 +1,11 @@
-# libraries
+# libraries (DO NOT TOUCH)
 import novapi
 from mbuild import gamepad
 from mbuild.encoder_motor import encoder_motor_class
 from mbuild import power_expand_board
 from mbuild.ranging_sensor import ranging_sensor_class
 from mbuild.smartservo import smartservo_class
-
+##          ##           ##
 
 # settings
 encoderSpeedDivider = 6         # set encoder speed **divider** / the more value = the slower
@@ -18,8 +18,8 @@ brushlessSpeed2 = 50
 
 # button settings
 autoStateKey = "L2"                # automatic state key
-button1 = "L1"                     # สายพานขึ้น (DC5-DC8)
-button2 = "R1"                     # สายพานลง (DC5-DC8)
+button1 = "L1"                     # สายพานขึ้น (DC5-DC6, DC7-DC8)
+button2 = "R1"                     # สายพานลง (DC5-DC6, DC7-DC8)
 button3 = "Up"                     # สลิงขึ้น (DC3)
 button4 = "Down"                   # สลิงลง (DC3)
 button5 = "Left"                   # หนีบเข้า (DC2)
@@ -89,17 +89,17 @@ def brushlessControl(key1:str, key2:str, speed1:float, speed2:float): # check!
         power_expand_board.stop("DC4")
 
 # DC control function
-def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:str, speed:float): #add ...keyN
+def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:str, speed:float):
     if gamepad.is_key_pressed(key1):
         power_expand_board.set_power("DC5", speed)
         power_expand_board.set_power("DC6", speed)
-        power_expand_board.set_power("DC7", speed)
-        power_expand_board.set_power("DC8", speed)
+        power_expand_board.set_power("DC7", -speed)
+        power_expand_board.set_power("DC8", -speed)
     elif gamepad.is_key_pressed(key2):
         power_expand_board.set_power("DC5", -speed)
         power_expand_board.set_power("DC6", -speed)
-        power_expand_board.set_power("DC7", -speed)
-        power_expand_board.set_power("DC8", -speed)
+        power_expand_board.set_power("DC7", speed)
+        power_expand_board.set_power("DC8", speed)
     elif gamepad.is_key_pressed(key3):
         power_expand_board.set_power("DC3", speed)
     elif gamepad.is_key_pressed(key4):
@@ -148,7 +148,7 @@ while True:
 
         else:
             timer = novapi.timer()
-            if timer <= 30:
+            if timer <= 29:
                 automaticStage()
                 isAutoPressed=True
             else:
