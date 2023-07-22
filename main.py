@@ -5,6 +5,7 @@ from mbuild.encoder_motor import encoder_motor_class
 from mbuild import power_expand_board
 from mbuild.ranging_sensor import ranging_sensor_class
 from mbuild.smartservo import smartservo_class
+
 ##          ##           ##
 
 # settings
@@ -12,10 +13,16 @@ encoderSpeedDivider = 6         # set encoder speed **divider** / the more value
 DC_DefaultSpeed = 100           # set DC motor default speed
 servoDefaultSpeed = 10          # set MANUAL servo default speed (rotation per minute)
 
+# flag DC settings
+flagDC_MotorSpeedDivider = 6    # set power of flag DC motor speed
+flagStopPower = -0.1            # set power of flag DC motor when control isn't pressed
+
 # brushless settings
 brushlessSpeed1 = 100           # set brushless speed (1 -> FASTEST, 4 -> SLOWEST)
 brushlessSpeed2 = 50
-
+                  
+                                   # ยกธง (DC1)
+                                   # ล้อ (M1-M4) 
 # button settings
 autoStateKey = "L2"                # automatic state key
 button1 = "L1"                     # สายพานขึ้น (DC5-DC6, DC7-DC8)
@@ -24,13 +31,12 @@ button3 = "Up"                     # สลิงขึ้น (DC3)
 button4 = "Down"                   # สลิงลง (DC3)
 button5 = "Left"                   # หนีบเข้า (DC2)
 button6 = "Right"                  # หนีบออก (DC2)
-button7 = "R2"                     # ยกธงขึ้น (DC1)
-button8 = "N2"                     # ที่ยิงยกขึ้น servo2 (M2)
-button9 = "N3"                     # ที่ยิงยกลง servo2 (M2)
-button10 = "+"                     # กวาดบอล / recycle เข้า servo1 (M1)
-button11 = "≡"                     # กวาดบอล / recycle ออก servo1 (M1)       
-button12 = "N4"                    # ยิงเร็ว (BL1-BL2, DC4)
-button13 = "N1"                    # ยิงช้า (BL1-BL2, DC4)
+button7 = "N2"                     # ที่ยิงยกขึ้น servo2 (M6)
+button8 = "N3"                     # ที่ยิงยกลง servo2 (M6)
+button9 = "+"                      # กวาดบอล / recycle เข้า servo1 (M5)
+button10 = "≡"                     # กวาดบอล / recycle ออก servo1 (M5)       
+button11 = "N4"                    # ยิงเร็ว (BL1-BL2, DC4)
+button12 = "N1"                    # ยิงช้า (BL1-BL2, DC4)
 
 
 ##### PROGRAMMER ZONE #####
@@ -46,8 +52,8 @@ encoder2 = encoder_motor_class("M2", "INDEX1")
 encoder3 = encoder_motor_class("M3", "INDEX1")
 encoder4 = encoder_motor_class("M4", "INDEX1")
 sensor = ranging_sensor_class("PORT1", "INDEX1")
-servo1 = smartservo_class("M1", "INDEX1")
-servo2 = smartservo_class("M2", "INDEX1")
+servo1 = smartservo_class("M5", "INDEX1")
+servo2 = smartservo_class("M6", "INDEX1")
 
 # encoder control function
 def encoderControl(divider:float): # check!
@@ -89,6 +95,9 @@ def brushlessControl(key1:str, key2:str, speed1:float, speed2:float): # check!
         power_expand_board.stop("DC4")
 
 # DC control function
+def flagDC_Control(stop_power:float):
+    power_expand_board.set_power("DC5", -gamepad.get_joystick("Ry")/flagDC_MotorSpeedDivider if gamepad.get_joystick("Ry")!=0 else stop_power) # this is python's ternary condition
+
 def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:str, speed:float):
     if gamepad.is_key_pressed(key1):
         power_expand_board.set_power("DC5", speed)
@@ -108,10 +117,7 @@ def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:
         power_expand_board.set_power("DC2", speed)
     elif gamepad.is_key_pressed(key6):
         power_expand_board.set_power("DC2", -speed)
-    elif gamepad.is_key_pressed(key7):
-        power_expand_board.set_power("DC1", -speed)
     else:
-        power_expand_board.stop("DC1")
         power_expand_board.stop("DC2")
         power_expand_board.stop("DC3")
         power_expand_board.stop("DC5")
@@ -141,10 +147,11 @@ while True:
                 automaticState = True
             else:
                 encoderControl(encoderSpeedDivider)
-                DC_Control(button1, button2, button3, button4, button5, button6, button7, DC_DefaultSpeed)
-                servoControl(servo1, button10, button11, servoDefaultSpeed)
-                servoControl(servo2, button8, button9, servoDefaultSpeed)
-                brushlessControl(button12, button13, brushlessSpeed1, brushlessSpeed2)
+                DC_Control(button1, button2, button3, button4, button5, button6, DC_DefaultSpeed)
+                servoControl(servo1, button9, button10, servoDefaultSpeed)
+                servoControl(servo2, button7, button8, servoDefaultSpeed)
+                brushlessControl(button11, button12, brushlessSpeed1, brushlessSpeed2)
+                flagDC_Control(flagStopPower)
 
         else:
             timer = novapi.timer()
