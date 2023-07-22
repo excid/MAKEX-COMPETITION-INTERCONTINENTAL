@@ -96,7 +96,7 @@ def brushlessControl(key1:str, key2:str, speed1:float, speed2:float): # check!
 
 # DC control function
 def flagDC_Control(stop_power:float):
-    power_expand_board.set_power("DC5", -gamepad.get_joystick("Ry")/flagDC_MotorSpeedDivider if gamepad.get_joystick("Ry")!=0 else stop_power) # this is python's ternary condition
+    power_expand_board.set_power("DC1", -gamepad.get_joystick("Ry")/flagDC_MotorSpeedDivider if gamepad.get_joystick("Ry")!=0 else stop_power) # this is python's ternary condition
 
 def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:str, speed:float):
     if gamepad.is_key_pressed(key1):
