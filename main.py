@@ -9,13 +9,18 @@ from mbuild.smartservo import smartservo_class
 ##          ##           ##
 
 # settings
-encoderSpeedDivider = 6         # set encoder speed **divider** / the more value = the slower
+encoderSpeedDivider = 2         # set encoder speed **divider** / the more value = the slower
 DC_DefaultSpeed = 100           # set DC motor default speed
 servoDefaultSpeed = 10          # set MANUAL servo default speed (rotation per minute)
 
 # flag DC settings
-flagDC_MotorSpeedDivider = 6    # set power of flag DC motor speed
-flagStopPower = -0.1            # set power of flag DC motor when control isn't pressed
+flagDC_MotorSpeedDivider = 1    # set power of flag DC motor speed
+flagStopPower = 0.5             # set power of flag DC motor when control isn't pressed
+
+# servo settings
+shooterServoResetDegree = 119        # shooter position servo degree
+shooterServoResetSpeed = 100         # speed in RPM
+shooterServoResetMultiplier = 1.07   
 
 # brushless settings
 brushlessSpeed1 = 100           # set brushless speed (1 -> FASTEST, 4 -> SLOWEST)
@@ -31,13 +36,12 @@ button3 = "Up"                     # สลิงขึ้น (DC3)
 button4 = "Down"                   # สลิงลง (DC3)
 button5 = "Left"                   # หนีบเข้า (DC2)
 button6 = "Right"                  # หนีบออก (DC2)
-button7 = "N2"                     # ที่ยิงยกขึ้น servo2 (M6)
-button8 = "N3"                     # ที่ยิงยกลง servo2 (M6)
+button7 = "N2"                     # ที่ยิงยกลง servo2 (M6)
+button8 = "N3"                     # ที่ยิงยกขึ้น servo2 (M6)
 button9 = "+"                      # กวาดบอล / recycle เข้า servo1 (M5)
 button10 = "≡"                     # กวาดบอล / recycle ออก servo1 (M5)       
 button11 = "N4"                    # ยิงเร็ว (BL1-BL2, DC4)
 button12 = "N1"                    # ยิงช้า (BL1-BL2, DC4)
-
 
 ##### PROGRAMMER ZONE #####
 
@@ -85,10 +89,10 @@ def brushlessPower(speed:float):
 def brushlessControl(key1:str, key2:str, speed1:float, speed2:float): # check!
     if gamepad.is_key_pressed(key1):
         brushlessPower(speed1)
-        power_expand_board.set_power("DC4", 100)
+        power_expand_board.set_power("DC4", -100)
     elif gamepad.is_key_pressed(key2):
         brushlessPower(speed2)
-        power_expand_board.set_power("DC4", 100)
+        power_expand_board.set_power("DC4", -100)
     else:
         power_expand_board.stop("BL1")
         power_expand_board.stop("BL2")
@@ -96,9 +100,10 @@ def brushlessControl(key1:str, key2:str, speed1:float, speed2:float): # check!
 
 # DC control function
 def flagDC_Control(stop_power:float):
-    power_expand_board.set_power("DC1", -gamepad.get_joystick("Ry")/flagDC_MotorSpeedDivider if gamepad.get_joystick("Ry")!=0 else stop_power) # this is python's ternary condition
+    power_expand_board.set_power("DC1", -gamepad.get_joystick("Ry")/flagDC_MotorSpeedDivider if gamepad.get_joystick("Ry")!=0 else stop_power) 
+    # this is python's ternary condition
 
-def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:str, speed:float):
+def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, speed:float):
     if gamepad.is_key_pressed(key1):
         power_expand_board.set_power("DC5", speed)
         power_expand_board.set_power("DC6", speed)
@@ -110,9 +115,9 @@ def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, key7:
         power_expand_board.set_power("DC7", speed)
         power_expand_board.set_power("DC8", speed)
     elif gamepad.is_key_pressed(key3):
-        power_expand_board.set_power("DC3", speed)
-    elif gamepad.is_key_pressed(key4):
         power_expand_board.set_power("DC3", -speed)
+    elif gamepad.is_key_pressed(key4):
+        power_expand_board.set_power("DC3", speed)
     elif gamepad.is_key_pressed(key5):
         power_expand_board.set_power("DC2", speed)
     elif gamepad.is_key_pressed(key6):
@@ -133,6 +138,10 @@ def servoControl(servoName, key1:str, key2:str, speed:float):
         servoName.set_power(-speed)
     else:
         servoName.set_power(0)
+
+def servoReset(servoName, key1:str, degree:float, speed:float):
+    if gamepad.is_key_pressed(key1):
+        servoName.move_to(degree, speed)
         
 # automatic stage function
 def automaticStage():
@@ -143,14 +152,16 @@ def automaticStage():
 while True:
     try:
         if (not automaticState):
-            if (gamepad.is_key_pressed(autoStateKey)) and (not isAutoPressed):
+            if gamepad.is_key_pressed(autoStateKey) and not isAutoPressed:
                 automaticState = True
             else:
+
                 encoderControl(encoderSpeedDivider)
                 DC_Control(button1, button2, button3, button4, button5, button6, DC_DefaultSpeed)
                 servoControl(servo1, button9, button10, servoDefaultSpeed)
-                servoControl(servo2, button7, button8, servoDefaultSpeed)
                 brushlessControl(button11, button12, brushlessSpeed1, brushlessSpeed2)
+                servoReset(servo2, button7, shooterServoResetDegree, shooterServoResetSpeed)
+                servoReset(servo2, button8, shooterServoResetDegree*shooterServoResetMultiplier, shooterServoResetSpeed)
                 flagDC_Control(flagStopPower)
 
         else:
