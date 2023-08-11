@@ -77,6 +77,7 @@ def encoderControl(divider:float): # check!
     encoder3.set_power(-(pivot + vertical - horizontal) / divider)
     encoder4.set_power((-pivot + vertical + horizontal) / divider)
 
+# stop encoder
 def robotStop():
     encoder1.set_power(0)
     encoder2.set_power(0)
@@ -88,6 +89,7 @@ def brushlessPower(speed:float):
     power_expand_board.set_power("BL1", speed)
     power_expand_board.set_power("BL2", speed)
 
+# control shooter position
 def brushlessControl(key1:str, key2:str, speed1:float, speed2:float):
     if gamepad.is_key_pressed(key1):
         brushlessPower(speed1)
@@ -104,10 +106,11 @@ def brushlessControl(key1:str, key2:str, speed1:float, speed2:float):
         novapi.reset_timer()
         
 
-# DC control function
+# control flag DC
 def flagDC_Control(stop_power:float):
     power_expand_board.set_power("DC1", gamepad.get_joystick("Ry")/flagDC_MotorSpeedDivider if gamepad.get_joystick("Ry")!=0 else stop_power) 
 
+# control all DC
 def DC_Control(key1:str, key2:str, key3:str, key4:str, key5:str, key6:str, speed:float):
     if gamepad.is_key_pressed(key1):
         power_expand_board.set_power("DC5", speed)
@@ -163,6 +166,7 @@ def autoReset():
     robotStop()
     novapi.reset_timer()
 
+# automatic grab
 def autoGrab():
     autoReset()
     while novapi.timer() <= 1.05 and(not gamepad.is_key_pressed(autoCancelKey) and not power_manage_module.is_auto_mode()):
@@ -173,15 +177,18 @@ def autoGrab():
         power_expand_board.set_power("DC3", 0)
         power_expand_board.set_power("DC2", 100)
 
+# auto stage wait
 def autoWait(time:float):
     autoReset()
     while novapi.timer() <= time and(not gamepad.is_key_pressed(autoCancelKey)):
         pass
-        
+
+# auto stage transition        
 def autoTrans():
     autoReset()
     autoWait(1)
 
+# automatic stage
 def automaticStage():
 
     power_expand_board.set_power("DC5", 100)
@@ -259,7 +266,6 @@ while True:
         automaticStage()
         autoTrans()
         manualStage()
-        autoWait(1)
         isAutoPressed = True
         automaticState = False
     else:
